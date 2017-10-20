@@ -444,7 +444,6 @@ Terminal.defaults = {
   scrollback: 1000,
   screenKeys: false,
   debug: false,
-  useStyle: false
   // programFeatures: false,
   // focusKeys: false,
 };
@@ -522,10 +521,6 @@ Terminal.prototype.initGlobal = function() {
 
   if (this.isMobile) {
     this.fixMobile(document);
-  }
-
-  if (this.useStyle) {
-    Terminal.insertStyle(document, this.colors[256], this.colors[257]);
   }
 };
 
@@ -683,56 +678,6 @@ Terminal.prototype.fixMobile = function(document) {
       self.send(value + '\r');
     });
   }
-};
-
-/**
- * Insert a default style
- */
-
-Terminal.insertStyle = function(document, bg, fg) {
-  var style = document.getElementById('term-style');
-  if (style) return;
-
-  var head = document.getElementsByTagName('head')[0];
-  if (!head) return;
-
-  var style = document.createElement('style');
-  style.id = 'term-style';
-
-  // textContent doesn't work well with IE for <style> elements.
-  style.innerHTML = ''
-    + '.terminal {\n'
-    + '  float: left;\n'
-    + '  border: ' + bg + ' solid 5px;\n'
-    + '  font-family: "DejaVu Sans Mono", "Liberation Mono", monospace;\n'
-    + '  font-size: 11px;\n'
-    + '  color: ' + fg + ';\n'
-    + '  background: ' + bg + ';\n'
-    + '}\n'
-    + '\n'
-    + '.terminal-cursor {\n'
-    + '  color: ' + bg + ';\n'
-    + '  background: ' + fg + ';\n'
-    + '}\n';
-
-  var out = '';
-  each(Terminal.colors, function(color, i) {
-    if (i === 256) {
-      out += '\n.term-bg-color-default { background-color: ' + color + '; }';
-    }
-    if (i === 257) {
-      out += '\n.term-fg-color-default { color: ' + color + '; }';
-    }
-    out += '\n.term-bg-color-' + i + ' { background-color: ' + color + '; }';
-    out += '\n.term-fg-color-' + i + ' { color: ' + color + '; }';
-  });
-  out += '\n.term-bold { font-weight: bold; }'
-  out += '\n.term-underline { text-decoration: underline; }'
-  out += '\n.term-blink { text-decoration: blink; }'
-  out += '\n.term-hidden { visibility: hidden; }'
-  style.innerHTML += out + '\n';
-
-  head.insertBefore(style, head.firstChild);
 };
 
 /**
@@ -1319,12 +1264,8 @@ Terminal.prototype.refresh = function(start, end) {
         if (data !== this.defAttr) {
           if (data === -1) {
             out += '<span class="reverse-video terminal-cursor">';
-	  } else {
-            if (this.useStyle) {
-	      out += '<span class="';
-	    } else {
-              out += '<span style="';
-            }
+          } else {
+            out += '<span class="';
 
             bg = data & 0x1ff;
             fg = (data >> 9) & 0x1ff;
@@ -1333,11 +1274,7 @@ Terminal.prototype.refresh = function(start, end) {
             // bold
             if (flags & 1) {
               if (!Terminal.brokenBold) {
-	        if (this.useStyle) {
-		  out += 'term-bold '
-                } else {
-                  out += 'font-weight:bold;';
-                }
+                out += 'term-bold '
               }
               // See: XTerm*boldColors
               if (fg < 8) fg += 8;
@@ -1345,25 +1282,12 @@ Terminal.prototype.refresh = function(start, end) {
 
             // underline
             if (flags & 2) {
-              if (this.useStyle) {
-                out += 'term-underline ';
-	      } else {
-                out += 'text-decoration:underline;';
-              }
+              out += 'term-underline ';
             }
 
             // blink
             if (flags & 4) {
-              if (this.useStyle) {
-                out += 'term-blink ';
-              } else {
-                if (flags & 2) {
-                  out = out.slice(0, -1);
-                  out += ' blink;';
-                } else {
-                  out += 'text-decoration:blink;';
-                }
-              }
+              out += 'term-blink ';
             }
 
             // inverse
@@ -1377,27 +1301,15 @@ Terminal.prototype.refresh = function(start, end) {
 
             // invisible
             if (flags & 16) {
-              if (this.useStyle) {
-                out += 'term-hidden ';
-              } else {
-                out += 'visibility:hidden;';
-              }
+              out += 'term-hidden ';
             }
 
             if (bg !== 256) {
-              if (this.useStyle) {
-                out += 'term-bg-color-' + bg + ' ';
-              } else {
-                out += 'background-color:' + this.colors[bg] + ';';
-              }
+              out += 'term-bg-color-' + bg + ' ';
             }
 
             if (fg !== 257) {
-              if (this.useStyle) {
-                out += 'term-fg-color-' + fg + ' ';
-              } else {
-                out += 'color:' + this.colors[fg] + ';';
-              }
+              out += 'term-fg-color-' + fg + ' ';
             }
 
             out += '">';
