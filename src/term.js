@@ -1116,8 +1116,6 @@ Terminal.prototype.bindMouse = function() {
         return cancel(ev);
       });
     }
-
-    return cancel(ev);
   });
 
   //if (self.normalMouse) {
