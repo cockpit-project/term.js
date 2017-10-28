@@ -247,7 +247,6 @@ function Terminal(options) {
   this.ydisp = 0;
   this.x = 0;
   this.y = 0;
-  this.cursorState = 0;
   this.cursorHidden = false;
   this.convertEol;
   this.state = 0;
@@ -438,7 +437,6 @@ Terminal.defaults = {
   convertEol: false,
   termName: 'xterm',
   geometry: [80, 24],
-  cursorBlink: true,
   visualBell: false,
   popOnBell: false,
   scrollback: 1000,
@@ -469,7 +467,6 @@ Terminal.prototype.focus = function() {
   }
 
   if (this.sendFocus) this.send('\x1b[I');
-  this.showCursor();
 
   // try {
   //   this.element.focus();
@@ -485,8 +482,6 @@ Terminal.prototype.focus = function() {
 Terminal.prototype.blur = function() {
   if (Terminal.focus !== this) return;
 
-  this.cursorState = 0;
-  this.refresh(this.y, this.y);
   if (this.sendFocus) this.send('\x1b[O');
 
   // try {
@@ -740,9 +735,6 @@ Terminal.prototype.open = function(parent) {
   if (!('useFocus' in this.options) || this.options.useFocus) {
     // Ensure there is a Terminal.focus.
     this.focus();
-
-    // Start blinking the cursor.
-    this.startBlink();
 
     // Bind to DOM events related
     // to focus and paste behavior.
@@ -1240,7 +1232,6 @@ Terminal.prototype.refresh = function(start, end) {
     out = '';
 
     if (y === this.y
-        && this.cursorState
         && (this.ydisp === this.ybase || this.selectMode)
         && !this.cursorHidden) {
       x = this.x;
@@ -1350,35 +1341,6 @@ Terminal.prototype.refresh = function(start, end) {
   if (parent) parent.appendChild(this.element);
 };
 
-Terminal.prototype._cursorBlink = function() {
-  if (Terminal.focus !== this) return;
-  this.cursorState ^= 1;
-  this.refresh(this.y, this.y);
-};
-
-Terminal.prototype.showCursor = function() {
-  if (!this.cursorState) {
-    this.cursorState = 1;
-    this.refresh(this.y, this.y);
-  } else {
-    // Temporarily disabled:
-    // this.refreshBlink();
-  }
-};
-
-Terminal.prototype.startBlink = function() {
-  if (!this.cursorBlink) return;
-  var self = this;
-  this._blinker = function() {
-    self._cursorBlink();
-  };
-  this._blink = setInterval(this._blinker, 500);
-};
-
-Terminal.prototype.refreshBlink = function() {
-  if (!this.cursorBlink || !this._blink) return;
-  clearInterval(this._blink);
-  this._blink = setInterval(this._blinker, 500);
 };
 
 Terminal.prototype.scroll = function() {
@@ -2763,7 +2725,6 @@ Terminal.prototype.keyDown = function(ev) {
   this.emit('keydown', ev);
   this.emit('key', key, ev);
 
-  this.showCursor();
   this.handler(key);
 
   return cancel(ev);
@@ -2814,7 +2775,6 @@ Terminal.prototype.keyPress = function(ev) {
   this.emit('keypress', key, ev);
   this.emit('key', key, ev);
 
-  this.showCursor();
   this.handler(key);
 
   return false;
@@ -3869,9 +3829,6 @@ Terminal.prototype.setMode = function(params) {
       case 7:
         this.wraparoundMode = true;
         break;
-      case 12:
-        // this.cursorBlink = true;
-        break;
       case 66:
         this.log('Serial port requested application keypad.');
         this.applicationKeypad = true;
@@ -3941,7 +3898,6 @@ Terminal.prototype.setMode = function(params) {
           };
           this.reset();
           this.normal = normal;
-          this.showCursor();
         }
         break;
     }
@@ -4066,9 +4022,6 @@ Terminal.prototype.resetMode = function(params) {
       case 7:
         this.wraparoundMode = false;
         break;
-      case 12:
-        // this.cursorBlink = false;
-        break;
       case 66:
         this.log('Switching back to normal keypad.');
         this.applicationKeypad = false;
@@ -4117,7 +4070,6 @@ Terminal.prototype.resetMode = function(params) {
           //   this.y = this.savedY;
           // }
           this.refresh(0, this.rows - 1);
-          this.showCursor();
         }
         break;
     }
@@ -5099,8 +5051,6 @@ Terminal.prototype.keyPrefix = function(ev, key) {
 };
 
 Terminal.prototype.keySelect = function(ev, key) {
-  this.showCursor();
-
   if (this.searchMode || key === 'n' || key === 'N') {
     return this.keySearch(ev, key);
   }
