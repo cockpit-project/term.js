@@ -1210,11 +1210,6 @@ Terminal.prototype.refresh = function(start, end) {
     , row
     , parent;
 
-  if (end - start >= this.rows / 2) {
-    parent = this.element.parentNode;
-    if (parent) parent.removeChild(this.element);
-  }
-
   width = this.cols;
   y = start;
 
@@ -1335,10 +1330,6 @@ Terminal.prototype.refresh = function(start, end) {
 
     this.children[y].innerHTML = out;
   }
-
-  if (parent) parent.appendChild(this.element);
-};
-
 };
 
 Terminal.prototype.scroll = function() {
