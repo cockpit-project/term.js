@@ -3,12 +3,9 @@
 A full xterm clone written in javascript. Used by
 [**tty.js**](https://github.com/chjj/tty.js).
 
-## Temporary fork of term.js
+## Fork of term.js
 
-This fork of term.js has the following open pull requests included:
-
- * Content-Security-Policy: https://github.com/chjj/term.js/pull/116
- * Module definition: https://github.com/chjj/term.js/pull/115
+This is a fork of the now unmaintained https://github.com/chjj/term.js with our own enhancements.
 
 ## Example
 
