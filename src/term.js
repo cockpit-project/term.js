@@ -1332,6 +1332,11 @@ Terminal.prototype.refresh = function(start, end) {
   }
 };
 
+Terminal.prototype.showCursor = function() {
+  this.cursorHidden = false;
+  this.refresh(this.y, this.y);
+};
+
 Terminal.prototype.scroll = function() {
   var row;
 
