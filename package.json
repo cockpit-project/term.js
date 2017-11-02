@@ -2,7 +2,7 @@
   "name": "term.js-cockpit",
   "description": "Cockpit's fork of the term.js project",
   "author": "Christopher Jeffrey",
-  "version": "0.0.9",
+  "version": "0.0.10",
   "license": "MIT",
   "main": "./index.js",
   "preferGlobal": false,
