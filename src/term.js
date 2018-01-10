@@ -441,6 +441,7 @@ Terminal.defaults = {
   popOnBell: false,
   scrollback: 1000,
   screenKeys: false,
+  disableScrollingRegion: false,
   debug: false,
   // programFeatures: false,
   // focusKeys: false,
@@ -2019,7 +2020,9 @@ Terminal.prototype.write = function(data) {
           //   dow) (DECSTBM).
           // CSI ? Pm r
           case 'r':
-            this.setScrollRegion(this.params);
+            if (!this.disableScrollingRegion) {
+              this.setScrollRegion(this.params);
+            } 
             break;
 
           // CSI s
